@@ -17,14 +17,17 @@ void watcher(string filename, Tid parent) {
   size_t bufsiz = inotify_event.sizeof + PATH_MAX + 1;
   inotify_event* event = cast(inotify_event *) malloc(bufsiz);
 
-  read(inotfd, event, bufsiz);
+  while (true) {
+    read(inotfd, event, bufsiz);
 
-  sleep(2);
-  send(parent, CHANGED);
+    sleep(2);
+    send(parent, CHANGED);
+  }
 }
 
 void restart(string p) {
   writeln("Found change. Restarting...");
+  kill(PROCESS);
   PROCESS = spawnProcess(p);
 }
 
