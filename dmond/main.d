@@ -31,6 +31,10 @@ void restart(string p) {
   PROCESS = spawnProcess(p);
 }
 
+void waiter(Tid parent) {
+  /* waits on the process and listens for errors */
+}
+
 void main (string[] args) {
   if ( args.length < 2 ) {
     writeln("Need something to monitor");
