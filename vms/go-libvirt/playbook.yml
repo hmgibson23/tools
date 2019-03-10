@@ -1,0 +1,28 @@
+---
+- hosts: main
+  remote_user: root
+  gather_facts: no
+  pre_tasks:
+    - name: 'install python2'
+      raw: sudo apt-get -y install python
+  vars:
+    dependencies:
+      - build-essential
+      - docker.io
+
+  tasks:
+    - name: dependencies
+      apt:
+        name: "{{ dependencies }}"
+        state: present
+    - name: Install
+      shell: |
+        add-apt-repository -y ppa:longsleep/golang-backports
+        apt-get update
+        apt-get -y upgrade
+        apt-get install -y golang-go
+        echo "export GO11MODULES=on" >> /home/vagrant/.bash_profile
+        echo "cd /src" >> /home/vagrant/.bash_profile
+        usermod -a -G docker vagrant
+      become: true
+      become_user: root

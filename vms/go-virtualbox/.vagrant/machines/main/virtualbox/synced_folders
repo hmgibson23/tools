@@ -1,0 +1,1 @@
+{"virtualbox":{"/src/":{"guestpath":"/src","hostpath":"/home/hugo/git/newsuk","disabled":false,"__vagrantfile":true},"/vagrant":{"guestpath":"/vagrant","hostpath":"/home/hugo/git/tools/vms/go-virtualbox","disabled":false,"__vagrantfile":true}}}

@@ -1,0 +1,22 @@
+VAGRANTFILE_API_VERSION = "2"
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.ssh.insert_key = false
+  config.vm.provider :virtualbox do |vb|
+    vb.customize ["modifyvm", :id, "--memory", "256"]
+  end
+  config.vm.define "k8s-master" do |app|
+    app.vm.hostname = "k8s-master.dev"
+    app.vm.box = "centos/7"
+    app.vm.network :private_network, ip: "10.0.2.1"
+  end
+  config.vm.define "k8s-slave-1" do |app|
+    app.vm.hostname = "k8s-slave-1.dev"
+    app.vm.box = "centos/7"
+    app.vm.network :private_network, ip: "10.0.2.2"
+  end
+  config.vm.define "k8s-slave-2" do |app|
+    app.vm.hostname = "k8s-slave-2.dev"
+    app.vm.box = "centos/7"
+    app.vm.network :private_network, ip: "10.0.2.3"
+  end
+end

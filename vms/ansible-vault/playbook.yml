@@ -1,0 +1,23 @@
+---
+- hosts: vault
+  gather_facts: no
+  pre_tasks:
+    - name: 'install python2'
+      raw: sudo apt-get -y install python
+  vars:
+    dependencies:
+      vault
+
+  tasks:
+    - name: Full system upgrade
+      shell: sudo apt-get update && sudo apt-get -y upgrade
+    - name: Vault
+      shell: |
+        wget https://releases.hashicorp.com/vault/1.0.3/vault_1.0.3_linux_amd64.zip
+        unzip vault_1.0.3_linux_amd64.zip
+        mv vault /usr/bin
+        mkdir /etc/vault
+
+
+      become: true
+      become_user: root

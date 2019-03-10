@@ -1,0 +1,11 @@
+#!/bin/bash
+PORTS="80 443"
+UNDO=
+
+for p in $PORTS
+do
+  iptables -I OUTPUT -p tcp --dport $p -j DROP
+  UNDO="$UNDO iptables -D OUTPUT -p tcp --dport $p -j DROP;"
+done
+
+echo $UNDO | at now + 1 min
