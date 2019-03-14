@@ -1,0 +1,92 @@
+---
+- hosts: void
+  remote_user: vagrant
+  pre_tasks:
+    - name: 'install python'
+      raw: xbps-install -Sfy -y python3
+
+  vars_files:
+    - vars.yaml
+  tasks:
+    - name: System Upgrade
+      xbps:
+        update_cache: true
+        upgrade: true
+
+    - name: Ensure directories
+      file:
+        path: "{{ src_home }}"
+        state: directory
+        owner: "{{ user }}"
+
+    - name: Alt Install
+      shell: |
+        xbps-install -Syf -y {{ item }}
+      with_items:
+        - "{{ cli }}"
+      become: true
+      become_method: sudo
+
+    - name: Clone Dotfiles
+      git:
+        repo: https://github.com/hmgibson23/snippets.git
+        dest: "{{src_home}}/snippets"
+
+    - name: Clone Tools
+      git:
+        repo: https://github.com/hmgibson23/tools.git
+        dest: "{{src_home}}/tools"
+
+    - name: DWM
+      git:
+        repo: git clone https://git.suckless.org/dwm
+        dest: "{{src_home}}/dwm"
+
+    - name: Clone the suckless simple terminal
+      git:
+        repo: https://git.suckless.org/st
+        dest: "{{src_home}}/st"
+        force: yes
+
+    - name: Fonts
+      git:
+        repo: git@github.com:ryanoasis/nerd-fonts.git
+        dest: "{{src_home}}/nerd-fonts"
+        force: yes
+
+    - name: Install Fonts
+      shell: |
+        cd {{src_home}}/nerd-fonts
+        ./install.sh Hack
+        ./install.sh Inconsolata
+        ./install.sh Terminus
+
+    - name: Build simple terminal
+      shell: |
+        cd {{src_home}} && rm -f ./st/config.def.h
+        ln -s {{src_home}}/snippets/config.def.h {{src_home}}/st/config.def.h
+        cd ./st && make
+
+    - name: Simple Terminal Install
+      shell: |
+        cd  {{ src_home }}/st && make install
+      become: yes
+      become_method: sudo
+
+    - name: NetworkManager
+      shell: |
+        ln -s /etc/sv/NetworkManager /var/service
+        ln -s /etc/sv/dbus /var/service
+      become: yes
+      become_method: sudo
+
+    - name: Enable DM and BSPWM
+      shell: |
+        ln -s /etc/sv/lxdm /var/service
+      become: true
+      become_method: sudo
+
+    - name: Vagrant plugins
+      shell: |
+        vagrant plugin install vagrant-mutate
+        vagrant plugin install vagrant-libvirt

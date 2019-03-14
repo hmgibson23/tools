@@ -1,6 +1,6 @@
 ---
 - hosts: main
-  remote_user: root
+  remote_user: vagrant
   gather_facts: no
   pre_tasks:
     - name: 'install python2'
@@ -9,24 +9,140 @@
     dependencies:
       - build-essential
       - docker.io
+      - python-dev
+      - python-pip
+      - docker-compose
+      - python3-dev
+      - python3-pip
+      - unzip
+      - stow
+      - ripgrep
+      - silversearcher-ag
+      - neovim
+      - fasd
+      - golang-go
+      - fonts-powerline
+      - fish
+      - zsh
 
   tasks:
+    - name: Update and upgrade apt packages
+      become: true
+      apt:
+        upgrade: yes
+        update_cache: yes
+        cache_valid_time: 86400
+    - name: Add repositories
+      apt_repository:
+        repo: ppa:neovim-ppa/stable
+        validate_certs: false
+        update_cache: yes
+      become: true
+      become_user: root
+    - name: Add repositories
+      apt_repository:
+        repo: ppa:fish-shell/release-3
+        validate_certs: false
+        update_cache: yes
+      become: true
+      become_user: root
+    - name: Add repositories
+      apt_repository:
+        repo: ppa:longsleep/golang-backports
+        validate_certs: false
+        update_cache: yes
+      become: true
+      become_user: root
+    - name: Add repositories
+      apt_repository:
+        repo: ppa:aacebedo/fasd
+        validate_certs: false
+        update_cache: yes
+      become: true
+      become_user: root
     - name: dependencies
       apt:
         name: "{{ dependencies }}"
         state: present
     - name: Install
       shell: |
-        add-apt-repository -y ppa:longsleep/golang-backports
-        apt-get update
-        apt-get -y upgrade
-        apt-get install -y golang-go
         echo "export GO11MODULES=on" >> /home/vagrant/.bash_profile
-        echo "cd /src" >> /home/vagrant/.bash_profile
+        echo "export GOPATH=/home/vagrant/go" >> /home/vagrant/.bash_profile
         usermod -a -G docker vagrant
       become: true
       become_user: root
+
+    - name: Nvim
+      shell: |
+        pip install --user neovim
+        pip3 install --user neovim
+        mkdir -p /home/vagrant/.local/share/nvim/site/autoload/
+
     - name: Add vbox hosts
       shell: /etc/init.d/virtualbox-guest-utils start
       become: true
       become_user: root
+
+    - name: Terraform
+      unarchive:
+        src: https://releases.hashicorp.com/terraform/0.9.1/terraform_0.9.1_linux_amd64.zip
+        dest: /usr/bin
+        remote_src: True
+      become: true
+      become_user: root
+
+    - name: Kubectl
+      snap:
+        name: kubectl
+        classic: yes
+      become: true
+      become_user: root
+
+
+    - name: Clone Dotfiles
+      git:
+        repo: https://github.com/hmgibson23/snippets.git
+        dest: /home/vagrant/snippets
+
+    - name: Clone FZF
+      git:
+        repo: https://github.com/junegunn/fzf.git
+        dest: /home/vagrant/.fzf
+        depth: 1
+
+    - name: Nvim Plugins
+      get_url:
+        url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+        dest: /home/vagrant/.local/share/nvim/site/autoload/plug.vim
+        owner: vagrant
+
+    - name: Git Config
+      shell: |
+        git config --global user.name "Hugo Gibson"
+        git config --global user.email hugo.gibson@yahoo.co.uk
+
+    - name: Nvim install
+      command: nvim +PlugInstall +qall
+
+    - name: Creates src directory
+      file:
+        path: /src
+        state: directory
+        owner: vagrant
+
+    - name: Own the dev dir
+      command: chown -R vagrant /home/vagrant
+      become: true
+      become_user: root
+
+    - name: Setup Dev Env
+      shell: |
+        ~/.fzf/install
+        cd /home/vagrant/snippets/ && make stow
+        echo "cd /src" >> /home/vagrant/.zprofile
+        echo "set PATH \"/home/vagrant/go/bin/:$PATH\"" >> /home/vagrant/.config/fish/config.fish
+
+    - name: Set Fish shell
+      user:
+        name: vagrant
+        shell: /usr/bin/fish
