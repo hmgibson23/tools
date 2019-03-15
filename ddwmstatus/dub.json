@@ -1,0 +1,12 @@
+{
+	"authors": [
+		"hugo"
+	],
+	"copyright": "Copyright © 2019, hugo",
+	"dependencies": {
+		"battery-d": "~>0.0.2"
+	},
+	"description": "A status bar for DWM",
+	"license": "proprietary",
+	"name": "ddwmstatus"
+}
