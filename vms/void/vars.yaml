@@ -15,6 +15,9 @@ cli:
   - xorg
   - pkg-config
   - git
+  - xorg-xfd
+  - pamixer
+  - xorg-fonts-misc
   - fontconfig
   - freetype2
   - the_silver_searcher
@@ -40,7 +43,6 @@ cli:
   - bat
   - ledger
   - pass
-  - nitrogen
   - compton
   - w3m
   - neomutt
@@ -70,3 +72,4 @@ cli:
   - python3
   - lxappearance
   - dmenu
+  - feh

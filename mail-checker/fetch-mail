@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+
+PASS=$(gpg -qd ~/.mutt/password.gpg)
+OUT=$(mail imaps://imap.gmail.com gibsonhugo@gmail.com $PASS)
+
+RES=$( echo $OUT | cut -d "(" -f2 | cut -d ")" -f1 | grep -o '.$')
+
+if [ "$RES" != "0" ]; then
+  tput setaf 1;
+  printf '\u2709'
+else
+  printf '\u2709'
+fi

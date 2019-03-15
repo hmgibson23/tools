@@ -60,6 +60,7 @@
         ./install.sh Hack
         ./install.sh Inconsolata
         ./install.sh Terminus
+        ./install.sh SourceCodePro
 
     - name: Build simple terminal
       shell: |
