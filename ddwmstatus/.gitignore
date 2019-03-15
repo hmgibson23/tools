@@ -1,0 +1,15 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/ddwmstatus
+ddwmstatus.so
+ddwmstatus.dylib
+ddwmstatus.dll
+ddwmstatus.a
+ddwmstatus.lib
+ddwmstatus-test-*
+*.exe
+*.o
+*.obj
+*.lst

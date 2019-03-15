@@ -15,6 +15,7 @@ cli:
   - xorg
   - pkg-config
   - git
+  - acpi
   - xorg-xfd
   - pamixer
   - xorg-fonts-misc

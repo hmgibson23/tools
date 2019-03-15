@@ -139,7 +139,8 @@
       shell: |
         ~/.fzf/install
         cd /home/vagrant/snippets/ && make stow
-        echo "cd /src" >> /home/vagrant/.zprofile
+        ceho "cd /src" >> /home/vagrant/.zprofile
+        echo "export PATH=$HOME/go/bin:$PATH" >> /home/vagrant/.bash_profile
         echo "set PATH \"/home/vagrant/go/bin/:$PATH\"" >> /home/vagrant/.config/fish/config.fish
 
     - name: Set Fish shell

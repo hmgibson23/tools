@@ -1,6 +1,6 @@
 install: clean build
 	cp ddwmstatus ~/.local/share/bin
 build:
-	dmd main.d -of=ddwmstatus
+	dub build
 clean:
 	rm -rf *.o ddwmstatus
