@@ -35,7 +35,15 @@ void timeRunner(Tid parent) {
 
   while (true) {
     auto time = Clock.currTime();
-    auto ret = TimeRes(format("%s:%s", time.hour, time.minute));
+    string min;
+    if ( time.minute < 10 ) {
+      min = format("%s:0%s", time.hour, time.minute);
+    } else {
+
+      min = format("%s:%s", time.hour, time.minute);
+    }
+
+    auto ret = TimeRes(min);
 
     send(parent, ret);
     sleep(59);
@@ -46,7 +54,8 @@ void batteryRunner(Tid parent) {
   import battery.d;
   while(true) {
     auto b = new Battery();
-    auto ret = BatteryRes(format("%s", b.level));
+    int o = cast(int)b.level;
+    auto ret = BatteryRes(format("%d", o));
     writeln("Level: ", b.level);
     send(parent, ret);
     sleep(10);
