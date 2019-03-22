@@ -39,7 +39,6 @@ cd $HOME
 curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
 ln -S /usr/bin/kubectl $HOME/kubectl
 
-
 # setup dotfiles
 git clone https://github.com/hmgibson23/snippets.git
 cd snippets && make stow
