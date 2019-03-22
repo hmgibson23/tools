@@ -91,14 +91,6 @@
       become: true
       become_user: root
 
-    - name: Kubectl
-      snap:
-        name: kubectl
-        classic: yes
-      become: true
-      become_user: root
-
-
     - name: Clone Dotfiles
       git:
         repo: https://github.com/hmgibson23/snippets.git

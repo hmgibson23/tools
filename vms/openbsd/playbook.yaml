@@ -3,15 +3,15 @@
   remote_user: vagrant
   pre_tasks:
     - name: 'install python'
-      raw: xbps-install -Sfy -y python3
+      raw: pkg_add python3
 
   vars_files:
     - vars.yaml
   tasks:
-    # - name: System Upgrade
-    #   xbps:
-    #     update_cache: true
-    #     upgrade: true
+    - name: System Upgrade
+      xbps:
+        update_cache: true
+        upgrade: true
 
     - name: Ensure directories
       file:
@@ -21,7 +21,7 @@
 
     - name: Alt Install
       shell: |
-        xbps-install -Syf -y {{ item }}
+         pkg_add {{ item }}
       with_items:
         - "{{ cli }}"
       become: true
@@ -30,7 +30,7 @@
     - name: Clone Dotfiles
       git:
         repo: https://github.com/hmgibson23/snippets.git
-        dest: "{{src_home}}/snippets"
+        dest: "{{home}}/snippets"
 
     - name: Clone Tools
       git:
@@ -97,8 +97,6 @@
         ln -s /etc/sv/lxdm /var/service
       become: true
       become_method: sudo
-
-# https://github.com/hectorm/hblock
 
     - name: BB Setup
       copy:

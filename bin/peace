@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env mksh
 PORTS="80 443"
 UNDO=
 
