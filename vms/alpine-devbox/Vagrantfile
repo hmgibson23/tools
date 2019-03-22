@@ -1,29 +1,16 @@
-# -*- mode: ruby -*-
-# vi: set ft=ruby :
+Vagrant.configure(2) do |config|
+  config.vm.box = 'alpine/alpine64'
 
-# All Vagrant configuration is done below. The "2" in Vagrant.configure
-# configures the configuration version (we support older styles for
-# backwards compatibility). Please don't change it unless you know what
-# you're doing.
-Vagrant.configure("2") do |config|
-  config.vm.box = "ubuntu/cosmic64"
-  config.vm.network :forwarded_port, guest: 8080, host: 4567
-  config.ssh.forward_agent = true
-
-  config.vm.provider :virtualbox do |vb|
-    vb.customize ["modifyvm", :id, "--memory", "1024"]
-    vb.customize ['modifyvm', :id, '--clipboard', 'bidirectional']
+  config.vm.provider 'virtualbox' do |vb|
+    vb.linked_clone = true
+    vb.memory = 2048
+    vb.cpus = 2
   end
 
-  config.vm.define "main" do |app|
-    app.vm.hostname = "main.dev"
-    config.vm.box = "ubuntu/cosmic64"
-    app.vm.network :private_network, ip: "192.168.60.7"
-  end
-
-
-  config.vm.provision "ansible" do |ansible|
-    ansible.playbook = "playbook.yml"
-    ansible.become = true
-  end
+  config.vm.provision 'shell', inline: 'uname -a'
+  config.vm.provision 'shell', inline: 'cat /etc/alpine-release'
+  config.vm.provision 'shell', inline: 'cat /etc/os-release'
+  config.vm.provision 'shell', inline: 'apk add util-linux; lsblk -x KNAME -o KNAME,SIZE,TRAN,SUBSYSTEMS,FSTYPE,UUID,LABEL,MODEL,SERIAL'
+  config.vm.provision 'shell', inline: 'df -h'
+  config.vm.provision 'shell', path: 'setup.sh'
 end
