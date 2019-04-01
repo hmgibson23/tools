@@ -1,0 +1,189 @@
+#!/bin/bash
+
+export BIN_PATH="$HOME/.local/share/bin"
+
+# on exit, kill all children
+trap 'pkill -P $$' EXIT
+LC_ALL=""
+
+fg="#C5C8C6"
+yellow="#F0C674"
+green="#B5BD68"
+red="#A54242"
+blue="#81A2BE"
+color0="#4f4847"
+
+init() {
+
+    [ -d /tmp/bar ] && rm -rf /tmp/bar
+    mkdir -p /tmp/bar
+
+   # let everything catchup
+    sleep 1
+
+    local res="$(xrandr --nograb --current | awk '/\*/ {print $1}' | tail -n 1)"
+    local res=${res% *}
+    local sw=${res%x*}
+    local sh=${res#*x}
+    local sw=${sw%.*}
+    local sh=${sh%.*}
+
+    w="$(echo "$sw*0.5" | bc)"
+    x=$gap
+    h=24
+
+   ft1="Sauce Code Pro Nerd Font:size=9:antialias=true:autohint=true"
+}
+
+layout() {
+   # TODO: Adapt this to xmonad
+    case $(< /tmp/dwm_info/current_layout) in
+        0) echo -n "\\uf44e" ;; # tiled
+        1) echo -n "\\ue28e" ;; # floating
+        2) echo -n "\\uf10c" ;; # monocle
+        3) echo -n "\\uf009" ;; # grid
+        4) echo -n "\\uf04c" ;; # center master
+        5) echo -n "\\uf247" ;; # center floating master
+        6) echo -n "\\uf302" ;; # fibonacci
+        7) echo -n "\\uf037" ;; # top master
+    esac 2> /dev/null
+}
+
+bvol() {
+    tvol="$(< /tmp/bar/vol)"
+    case ${tvol%??} in
+        10|[5-9]) echo -n "\\uf028 $tvol" ;;
+        [1-4]) echo -n "\\uf027 $tvol" ;;
+        *) echo -n "\\uf026 $tvol"
+    esac
+}
+
+$BIN_PATH/vol > /tmp/bar/vol
+
+launch_daemons() {
+    # vol daemon
+    dash -c 'while true ; do
+    $BIN_PATH/vol > /tmp/bar/vol
+    done' > /dev/null 2>&1 &
+
+    # net_daemon
+    dash -c '
+    sleep 10
+    while true ; do
+        pgrep -x openvpn > /dev/null &&
+            echo -n "\\uf023 $(cat /tmp/vpn)" > /tmp/bar/vpn ||
+            echo -n "\\uf09c None" > /tmp/bar/vpn
+
+        /bin/ping -c 1 -n -q -s 1 -w 10 1.1.1.1 > /dev/null 2>&1 &&
+            wifi="\\uf1eb" ||
+            wifi="\\uf467"
+
+        ssid="$(dash $BIN_PATH/ssid)"
+        [ -n "$ssid" ] &&
+            wifi="$wifi $ssid"
+
+        echo -n "$wifi" > /tmp/bar/wifi
+
+        sleep 10
+    done' > /dev/null 2>&1 &
+
+    # music daemon
+    dash -c 'while true ; do
+        if pgrep -x mpv > /dev/null ; then
+            tmpsong=$(dash $BIN_PATH/song 60 "")
+            echo -n $tmpsong > /tmp/bar/song
+        elif [ -f /tmp/bar/song ] ; then
+            rm /tmp/bar/song -- > /dev/null 2>&1
+        fi
+        sleep 3
+    done' > /dev/null 2>&1 &
+
+    # mail daemon
+    dash -c 'while true ; do
+      echo $($BIN_PATH/checkmail) > /tmp/bar/mail
+        sleep 45
+    done' > /dev/null 2>&1 &
+
+    # battery_daemon
+    dash -c '[ $($BIN_PATH/bperc) = NONE ] && exit ;
+        while true ; do
+        if $(case $(uname) in
+                Linux)   test $(cat /sys/class/power_supply/AC/online) -eq 1 ;;
+                OpenBSD) test $(apm -a) -eq 1
+            esac)
+        then
+            bat="\\uf492"
+        else
+            perc=$($BIN_PATH/bperc)
+            case ${perc%?} in
+                [8-9]) bat="%{F$green}\\uf240" ;;
+                [6-7]) bat="%{F$green}\\uf241" ;;
+                [4-5]) bat="%{F$yellow}\\uf242" ;;
+                [2-3]) bat="%{F$yellow}\\uf243" ;;
+                [0-1]) bat="%{F$red}\\uf244"
+            esac
+        fi
+        echo -n "$bat" > /tmp/bar/bat
+
+        sleep 15
+    done' > /dev/null 2>&1 &
+
+    # time_daemon
+    dash -c 'while date "+%a, %R" > /tmp/bar/date
+        do sleep 30
+    done' &
+
+
+    # updates daemon
+    dash -c 'while $($BIN_PATH/void-updates) > /tmp/bar/updates
+      do sleep 420
+      done' > /dev/null 2>&1 &
+}
+
+get_bat() {
+    if [ -f /tmp/bar/bat ] && [ "$(< /tmp/bar/bat)" != NONE ] ; then
+        echo "$(< /tmp/bar/bat)"
+    fi
+}
+
+get_wifi() {
+    if [ -n "$(interface)" ] ; then
+        echo "$(< /tmp/bar/wifi)"
+    fi
+}
+
+get_mail() {
+    if [ -f /tmp/bar/mail ] ; then
+         mail="$(< /tmp/bar/mail)"
+         if [ "$mail" -gt "0" ] ; then
+             echo "%{F$red}%{F-}"
+         else
+             echo ""
+         fi
+    fi
+}
+
+init
+launch_daemons
+
+while \
+    printf " %s%b%b%b%b%b%b%b%b%s \\n" \
+        " $(wksp) $(< /tmp/bar/wksp)%{-u}  " \
+        " $(layout)" \
+        "%{r} $(< /tmp/bar/date)" \
+        " $(get_wifi)" \
+        " $(get_bat)" \
+        " $(get_mail)" \
+        " $(bvol)"
+    do sleep 1
+done 2> /dev/null | \
+
+lemonbar \
+         -f "$ft1" \
+         -g 500x${h}+1420+0 \
+         -n bar \
+         -u 2 \
+         -U $color2 \
+         -B $color0 \
+         -F $color1 \
+         -a 0 > /dev/null 2>&1

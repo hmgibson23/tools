@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+
+
+server="$(sudo ls /etc/openvpn/ovpn_tcp | fzf -1 -0 --no-sort +m)"
+sudo openvpn --daemon "/etc/openvpn/ovpn_tcp/$server"

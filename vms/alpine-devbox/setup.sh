@@ -4,7 +4,8 @@ apk update
 apk add busybox-extras git openssh neovim vim \
   mksh fish ca-certificates \
   bash gcc musl-dev openssl \
-  go fzf bats tar wget stow make curl python3 tmux
+  the_silver_searcher libxml2-dev linux-headers \
+  go fzf bats tar wget stow make curl python3 tmux emacs
 
 # this was lifted from the go dockerfile image
 [ ! -e /etc/nsswitch.conf ] && echo 'hosts: files dns' > /etc/nsswitch.conf
@@ -23,8 +24,6 @@ cd /usr/local/go/src;
 rm -rf /usr/local/go/pkg/bootstrap /usr/local/go/pkg/obj
 export PATH="/usr/local/go/bin:$PATH" >> /home/vagrant/.profile;
 
-# terraform
-export TERRAFORM_VERSION=0.11.12
 export TF_DEV=true
 export TF_RELEASE=true
 export GOPATH="$HOME/go"
@@ -54,3 +53,6 @@ curl https://sh.rustup.rs -sSf | sh
 curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs \
     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 nvim +PlugInstall +qall
+
+# cask and emacs
+curl -fsSL https://raw.githubusercontent.com/cask/cask/master/go | python

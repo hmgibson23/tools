@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+
+cd $HOME/.local/share/fonts/
+mkfontscale
+mkfontdir
+xset fp rehash
+fc-cache -fv
